@@ -3,7 +3,7 @@ Automated Webscraper using Bright Data. This is a submission for the [Bright Dat
 
 
 # Important
-Please make sure to following the below pre-requisite and update the appSettings.json
+Please make sure to follow the below pre-requisite and update the appSettings.json
 
 # Prerequisite:
 
