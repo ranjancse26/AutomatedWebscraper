@@ -12,7 +12,7 @@ namespace AutomatedWebscraper.Services
     public interface IGlassdoorService
     {
         Task<string> GetStructuredInfo(GlassdoorResponse glassdoorResponse);
-        Task<string> PerformGlassdoorApiScraping(string brightDataBaseUrl, string apiKey,
+        Task<string> PerformGlassdoorApiScraping(string urlToScrape, string brightDataBaseUrl, string apiKey,
             string geminiApiKey, string snapshotId);
         GlassdoorFinetuneResponse GetFinetuneResponse(string company, string url,
             string structuredResponse);
@@ -76,7 +76,7 @@ namespace AutomatedWebscraper.Services
         }
 
 
-        public async Task<string> PerformGlassdoorApiScraping(string brightDataBaseUrl, string apiKey,
+        public async Task<string> PerformGlassdoorApiScraping(string urlToScrape, string brightDataBaseUrl, string apiKey,
             string geminiApiKey, string snapshotId)
         {
             string dataSetId = BrightDatasetConstant.GlassdoorDatasetId;
@@ -88,7 +88,7 @@ namespace AutomatedWebscraper.Services
                 {
                    new GlassdoorRequest
                    {
-                       url = "https://www.glassdoor.co.uk/Overview/Working-at-Bright-Data-EI_IE2267280.11,22.htm"
+                       url = urlToScrape
                    }
                 });
 

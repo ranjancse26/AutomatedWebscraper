@@ -83,13 +83,13 @@ class BookingScraper
                     System.Console.WriteLine("No booking data");
                 break;
             case "3":
-                var structuredInfo = await glassdoorService.PerformGlassdoorApiScraping(brightDataBaseUrl, webscraperApiKey,
+                string urlToScrape = "https://www.glassdoor.co.uk/Overview/Working-at-Bright-Data-EI_IE2267280.11,22.htm";
+                var structuredInfo = await glassdoorService.PerformGlassdoorApiScraping(urlToScrape, brightDataBaseUrl, webscraperApiKey,
                     geminiApiKey, "");
                 if (!string.IsNullOrEmpty(structuredInfo))
                 {
                     var fineTuneInstructionSet = glassdoorService.GetFinetuneResponse("Bright Data",
-                        "https://www.glassdoor.co.uk/Overview/Working-at-Bright-Data-EI_IE2267280.11,22.htm",
-                        structuredInfo);
+                        urlToScrape, structuredInfo);
                     System.Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(fineTuneInstructionSet,
                         new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
                 }
