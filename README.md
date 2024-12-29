@@ -1,9 +1,11 @@
 # AutomatedWebscraper
-Automated Webscraper using Bright Data
+Automated Webscraper using Bright Data. This is a submission for the [Bright Data Web Scraping Challenge](https://dev.to/challenges/brightdata):
 
-*This is a submission for the [Bright Data Web Scraping Challenge](https://dev.to/challenges/brightdata): Most Creative Use of Web Data for AI Models*
 
-**Prerequisite:** 
+# Important
+Please make sure to following the below pre-requisite and update the appSettings.json
+
+# Prerequisite:
 
 1. Please read the following blog post to get started on the Bright Data for the AI use-cases [Bright Data to Tackle AI Data Challenges](https://dev.to/ranjancse/bright-data-to-tackle-ai-data-challenges-1l7h)
 
