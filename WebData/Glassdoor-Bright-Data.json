@@ -1,0 +1,67 @@
+[
+    {
+        "input": {
+            "url": "https://www.glassdoor.co.uk/Overview/Working-at-Bright-Data-EI_IE2267280.11,22.htm"
+        },
+        "id": "2267280",
+        "company": "Bright Data",
+        "ratings_overall": 4,
+        "details_size": "201 to 500 Employees",
+        "details_founded": 2014,
+        "details_type": "Company - Private",
+        "country_code": "United Kingdom",
+        "company_type": "Company - Private",
+        "url_overview": "https://www.glassdoor.co.uk/Overview/Working-at-Bright-Data-EI_IE2267280.11,22.htm",
+        "url_reviews": "https://www.glassdoor.co.uk/Reviews/Bright-Data-Reviews-E2267280.htm",
+        "details_headquarters": "Netanya, Israel",
+        "details_industry": "Internet & Web Services",
+        "details_revenue": "$100 to $500 million (USD)",
+        "details_website": "www.brightdata.com",
+        "interviews_url": "https://www.glassdoor.co.uk/Interview/Bright-Data-Interview-Questions-E2267280.htm",
+        "ratings_career_opportunities": 3.6,
+        "ratings_ceo_approval": 0.82,
+        "ratings_ceo_approval_count": 86,
+        "ratings_compensation_benefits": 3.8,
+        "ratings_cutlure_values": 0,
+        "diversity_inclusion_score": "3.9",
+        "diversity_inclusion_count": "133",
+        "ratings_senior_management": 3.7,
+        "ratings_work_life_balance": 3.9,
+        "ratings_business_outlook": 0.7,
+        "ratings_recommend_to_friend": 0.74,
+        "ratings_rated_ceo": "Or Lenchner",
+        "salaries_count": 200,
+        "career_opportunities_distribution": {
+            "one_star": 23,
+            "two_star": 8,
+            "three_star": 20,
+            "four_star": 24,
+            "five_star": 75
+        },
+        "interview_difficulty": "AVERAGE",
+        "interviews_count": 50,
+        "benefits_count": 27,
+        "jobs_count": 15,
+        "photos_count": "40",
+        "reviews_count": 188,
+        "interviews_experience": [
+            {
+                "name": "POSITIVE",
+                "value": "44%"
+            },
+            {
+                "name": "NEGATIVE",
+                "value": "30%"
+            },
+            {
+                "name": "NEUTRAL",
+                "value": "26%"
+            }
+        ],
+        "url": "https://www.glassdoor.co.uk/Overview/Working-at-Bright-Data-EI_IE2267280.11,22.htm",
+        "industry": "Internet & Web Services",
+        "additional_information": null,
+        "stock_symbol": null,
+        "timestamp": "2024-12-29T04:13:05.811Z"
+    }
+]

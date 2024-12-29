@@ -1,0 +1,27 @@
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "{{content}}"
+        }
+      ]
+    }
+  ],
+  "systemInstruction": {
+    "role": "user",
+    "parts": [
+        {
+            "text": "System Instructions:\nYou are an AI assistant tasked with generating a clear, concise, and professional company summary based on Glassdoor data. Structure the summary into logical sections, focusing on key insights such as company overview, ratings, workplace culture, and employee sentiment.\n\nDO NOT Respond with your own sentences or suggestions"
+        }
+    ]
+  },
+  "generationConfig": {
+    "temperature": 0,
+    "topK": 40,
+    "topP": 0.95,
+    "maxOutputTokens": 8192,
+    "responseMimeType": "text/plain"
+  }
+}
