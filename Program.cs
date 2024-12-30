@@ -25,6 +25,7 @@ class BookingScraper
         string webscraperApiKey = config[AppConstant.WebscraperApiToken];
         string geminiApiKey = config[LLMConstant.GeminiApiKey];
         int popupTimeout = int.Parse(config[AppConstant.PopupTimeout]);
+        int httpRequestTimeout = int.Parse(config[AppConstant.HttpRequestTimeout]);
 
 
         string exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -32,10 +33,10 @@ class BookingScraper
         string glassdoorSummaryPrompt = File.ReadAllText($"{promptsFolderPath}//GlassdoorCompanySummaryPrompt.json");
 
         var geminiPromptService = new GeminiPromptService(geminiApiKey,
-            "https://generativelanguage.googleapis.com", "gemini-2.0-flash-exp", "5000");
-        var glassdoorService = new GlassdoorService(glassdoorSummaryPrompt, geminiPromptService);
+            "https://generativelanguage.googleapis.com", "gemini-2.0-flash-exp", httpRequestTimeout);
+        var glassdoorService = new GlassdoorService(glassdoorSummaryPrompt, geminiPromptService, httpRequestTimeout);
 
-        IBookingComService bookingComService = new BookingComService(brightDataBaseUrl, webscraperApiKey);
+        IBookingComService bookingComService = new BookingComService(brightDataBaseUrl, webscraperApiKey, httpRequestTimeout);
 
         System.Console.WriteLine("1. Booking Headless Browser Webscraper");
         System.Console.WriteLine("2. Booking Webscraper API based Webscraper");
@@ -49,7 +50,12 @@ class BookingScraper
         {
             case "1":
                 string city = "New York";
-                await bookingComService.PerformBookingHeadlessBrowserScraping(city, wssEndpoint, popupTimeout);
+                var now = DateTime.Now;
+                var checkIn = bookingComService.ToBookingTimestamp(
+                    bookingComService.AddDays(now, 1));
+                var checkOut = bookingComService.ToBookingTimestamp(
+                    bookingComService.AddDays(now, 2));
+                await bookingComService.PerformBookingHeadlessBrowserScraping(city, wssEndpoint, popupTimeout, checkIn, checkOut);
                 break;
             case "2":
                 List<BookingComRequest> bookingComRequests =

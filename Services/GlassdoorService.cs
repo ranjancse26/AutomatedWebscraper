@@ -25,12 +25,14 @@ namespace AutomatedWebscraper.Services
     {
         private string promptPayload;
         private readonly IGeminiPromptService geminiPromptService;
+        private int httpRequestTimeout;
         private const string Instruction = "Generate a professional company summary based on the provided data.";
 
-        public GlassdoorService(string promptPayload, IGeminiPromptService geminiPromptService)
+        public GlassdoorService(string promptPayload, IGeminiPromptService geminiPromptService, int httpRequestTimeout)
         {
             this.promptPayload = promptPayload;
             this.geminiPromptService = geminiPromptService;
+            this.httpRequestTimeout = httpRequestTimeout;
         }
 
         /// <summary>
@@ -80,7 +82,7 @@ namespace AutomatedWebscraper.Services
             string geminiApiKey, string snapshotId)
         {
             string dataSetId = BrightDatasetConstant.GlassdoorDatasetId;
-            IGlassdoorWebscraper glassdoorWebscraper = new GlassdoorWebscraper(brightDataBaseUrl, apiKey, dataSetId);
+            IGlassdoorWebscraper glassdoorWebscraper = new GlassdoorWebscraper(brightDataBaseUrl, apiKey, dataSetId, httpRequestTimeout);
 
             if (string.IsNullOrEmpty(snapshotId))
             {

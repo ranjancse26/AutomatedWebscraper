@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using Polly;
+using RestSharp;
 using Newtonsoft.Json;
 using AutomatedWebscraper.Domain.Response;
 
@@ -20,20 +21,39 @@ namespace AutomatedWebscraper.Webscraper
         private string apiKey;
         private string dataSetId;
         private string baseUrl;
-        public BrightDataWebscraper(string baseUrl, string apiKey, string dataSetId)
+        private int httpRequestTimeout;
+        public BrightDataWebscraper(string baseUrl, string apiKey, string dataSetId, int httpRequestTimeout)
         {
             this.baseUrl = baseUrl;
             this.apiKey = apiKey;
             this.dataSetId = dataSetId;
+            this.httpRequestTimeout = httpRequestTimeout;
         }
         
         public async Task<bool> CancelSnapshot(string snapshotId)
         {
-            var options = new RestClientOptions(baseUrl);
-            var client = new RestClient(options);
-            var request = new RestRequest($"/datasets/v3/snapshot/{snapshotId}/cancel", Method.Post);
-            request.AddHeader("Authorization", $"Bearer {apiKey}");
-            RestResponse restResponse = await client.ExecuteAsync(request);
+            var restResponse = await Policy
+                .HandleResult<RestResponse>(message => !message.IsSuccessStatusCode)
+                .WaitAndRetryAsync(new[]
+                {
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(3),
+                    TimeSpan.FromSeconds(9)
+                }, (result, timeSpan, retryCount, context) => {
+                    Console.WriteLine($"Request failed with {result.Result.StatusCode}. " +
+                        $"Retry count = {retryCount}. Waiting {timeSpan} before next retry. ");
+                })
+                .ExecuteAsync(async () =>
+                {
+                    var options = new RestClientOptions(baseUrl);
+                    options.Timeout = TimeSpan.FromSeconds(httpRequestTimeout);
+                    var client = new RestClient(options);
+                    var request = new RestRequest($"/datasets/v3/snapshot/{snapshotId}/cancel", Method.Post);
+                    request.AddHeader("Authorization", $"Bearer {apiKey}");
+                    RestResponse response = await client.ExecuteAsync(request);
+                    return response;
+                });
+            
             if (restResponse.IsSuccessful)
             {
                 var response = JsonConvert.DeserializeObject<string>(restResponse.Content);
@@ -46,12 +66,27 @@ namespace AutomatedWebscraper.Webscraper
 
         public async Task<MonitorStatus> GetMonitorStatus(string snapshotId)
         {
-            var options = new RestClientOptions(baseUrl);
-            var client = new RestClient(options);
-            var request = new RestRequest($"/datasets/v3/progress/{snapshotId}", Method.Get);
-            request.AddHeader("Authorization", $"Bearer {apiKey}");
-            RestResponse response = await client.ExecuteAsync(request);
-
+            var response = await Policy
+                .HandleResult<RestResponse>(message => !message.IsSuccessStatusCode)
+                .WaitAndRetryAsync(new[]
+                {
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(3),
+                    TimeSpan.FromSeconds(9)
+                }, (result, timeSpan, retryCount, context) => {
+                    Console.WriteLine($"Request failed with {result.Result.StatusCode}. " +
+                        $"Retry count = {retryCount}. Waiting {timeSpan} before next retry. ");
+                })
+                .ExecuteAsync(async () =>
+                {
+                    var options = new RestClientOptions(baseUrl);
+                    var client = new RestClient(options);
+                    var request = new RestRequest($"/datasets/v3/progress/{snapshotId}", Method.Get);
+                    request.AddHeader("Authorization", $"Bearer {apiKey}");
+                    RestResponse response = await client.ExecuteAsync(request);
+                    return response;
+                });
+           
             if (response.IsSuccessful)
             {
                 var monitorStatus = JsonConvert.DeserializeObject<MonitorStatus>(response.Content);
@@ -64,19 +99,35 @@ namespace AutomatedWebscraper.Webscraper
 
         public async Task<SnapshotResponse> PerformScraping(string data, bool includeErrors = true)
         {
-            var options = new RestClientOptions(baseUrl);
-            var client = new RestClient(options);
-            string requestingUrl = $"/datasets/v3/trigger?dataset_id={dataSetId}";
+            var response = await Policy
+                .HandleResult<RestResponse>(message => !message.IsSuccessStatusCode)
+                .WaitAndRetryAsync(new[]
+                {
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(3),
+                    TimeSpan.FromSeconds(9)
+                }, (result, timeSpan, retryCount, context) => {
+                    Console.WriteLine($"Request failed with {result.Result.StatusCode}. " +
+                        $"Retry count = {retryCount}. Waiting {timeSpan} before next retry. ");
+                })
+                .ExecuteAsync(async () =>
+                {
+                    var options = new RestClientOptions(baseUrl);
+                    var client = new RestClient(options);
+                    string requestingUrl = $"/datasets/v3/trigger?dataset_id={dataSetId}";
 
-            if (includeErrors)
-                requestingUrl += "&include_errors=true";
+                    if (includeErrors)
+                        requestingUrl += "&include_errors=true";
 
-            var request = new RestRequest(requestingUrl, Method.Post);
+                    var request = new RestRequest(requestingUrl, Method.Post);
 
-            request.AddHeader("Authorization", $"Bearer {apiKey}");
-            request.AddHeader("Content-Type", "application/json");
-            request.AddStringBody(data, DataFormat.Json);
-            RestResponse response = await client.ExecuteAsync(request);
+                    request.AddHeader("Authorization", $"Bearer {apiKey}");
+                    request.AddHeader("Content-Type", "application/json");
+                    request.AddStringBody(data, DataFormat.Json);
+                    RestResponse response = await client.ExecuteAsync(request);
+                    return response;
+                });
+            
 
             if (response.IsSuccessful)
             {

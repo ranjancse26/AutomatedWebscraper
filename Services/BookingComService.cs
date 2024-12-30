@@ -10,10 +10,12 @@ namespace AutomatedWebscraper.Services
 {
     public interface IBookingComService
     {
+        DateTime AddDays(DateTime date, int days);
+        string ToBookingTimestamp(DateTime date);
         Task<List<BookingResponse>> PerformBookingComApiScraping(List<BookingComRequest> bookingComRequests);
         Task<List<BookingResponse>> PerformBookingComApiScraping(string snapshotId);
         Task PerformBookingHeadlessBrowserScraping(string city,
-            string wssEndpoint, int popupTimeout);
+            string wssEndpoint, int popupTimeout, string checkIn, string checkOut);
     }
 
     /// <summary>
@@ -23,11 +25,25 @@ namespace AutomatedWebscraper.Services
     {
         private string baseUrl;
         private string apiKey;
-        public BookingComService(string baseUrl, string apiKey) 
+        private int httpRequestTimeout;
+        public BookingComService(string baseUrl, string apiKey, int httpRequestTimeout) 
         {
             this.baseUrl = baseUrl;
             this.apiKey = apiKey;
+            this.httpRequestTimeout = httpRequestTimeout;
         }
+
+
+        public DateTime AddDays(DateTime date, int days)
+        {
+            return date.AddDays(days);
+        }
+
+        public string ToBookingTimestamp(DateTime date)
+        {
+            return date.ToString("yyyy-MM-dd");
+        }
+
 
         public async Task<List<BookingResponse>> PerformBookingComApiScraping(List<BookingComRequest> bookingComRequests)
         {
@@ -35,7 +51,7 @@ namespace AutomatedWebscraper.Services
             {
                 // Web Scraper API
                 string dataSetId = BrightDatasetConstant.BookingComDatasetId;
-                IBookingComWebscraper bookingComWebscraper = new BookingComWebscraper(baseUrl, apiKey, dataSetId);
+                IBookingComWebscraper bookingComWebscraper = new BookingComWebscraper(baseUrl, apiKey, dataSetId, httpRequestTimeout);
 
                 var snapshotResponse = await bookingComWebscraper.PerformScraping(bookingComRequests);
                 System.Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(snapshotResponse,
@@ -72,7 +88,7 @@ namespace AutomatedWebscraper.Services
             {
                 // Web Scraper API
                 string dataSetId = BrightDatasetConstant.BookingComDatasetId;
-                IBookingComWebscraper bookingComWebscraper = new BookingComWebscraper(baseUrl, apiKey, dataSetId);
+                IBookingComWebscraper bookingComWebscraper = new BookingComWebscraper(baseUrl, apiKey, dataSetId, httpRequestTimeout);
 
                 var monitorStatus = await ((IBrightDataWebscraper)bookingComWebscraper).GetMonitorStatus(snapshotId);
 
@@ -90,19 +106,13 @@ namespace AutomatedWebscraper.Services
         }
 
         public async Task PerformBookingHeadlessBrowserScraping(string city,
-            string wssEndpoint, int popupTimeout)
+            string wssEndpoint, int popupTimeout, string checkIn, string checkOut)
         {
             try
             {
                 // Headless Browser
                 BookingComHeadlessWebscraper bookingComHeadlessWebscraper =
                     new BookingComHeadlessWebscraper(wssEndpoint, popupTimeout);
-
-                var now = DateTime.Now;
-                var checkIn = bookingComHeadlessWebscraper.ToBookingTimestamp(
-                    bookingComHeadlessWebscraper.AddDays(now, 1));
-                var checkOut = bookingComHeadlessWebscraper.ToBookingTimestamp(
-                    bookingComHeadlessWebscraper.AddDays(now, 2));
 
                 var jsonData = await bookingComHeadlessWebscraper.PerformScraping(city, checkIn, checkOut);
                 Console.WriteLine($"Booking Response: {jsonData}");

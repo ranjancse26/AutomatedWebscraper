@@ -1,4 +1,5 @@
-﻿using RestSharp;
+﻿using Polly;
+using RestSharp;
 using Newtonsoft.Json;
 using AutomatedWebscraper.Domain.Response;
 using AutomatedWebscraper.Domain.Request;
@@ -18,9 +19,9 @@ namespace AutomatedWebscraper.Services
         private readonly string apiKey;
         private readonly string baseUrl;
         private readonly string modelName;
-        private readonly string timeOutInMin;
+        private readonly int timeOutInMin;
         public GeminiPromptService(string apiKey, string baseUrl,
-            string modelName, string timeOutInMin)
+            string modelName, int timeOutInMin)
         {
             this.apiKey = apiKey;
             this.baseUrl = baseUrl;
@@ -30,30 +31,38 @@ namespace AutomatedWebscraper.Services
 
         public async Task<GeminiResponseRoot> Execute(GeminiInputRoot geminiInputRoot)
         {
-            try
-            {
-                var options = new RestClientOptions(baseUrl);
-                var client = new RestClient(options);
-                var request = new RestRequest($"/v1beta/models/{modelName}:generateContent?key={apiKey}",
-                    Method.Post);
-
-                request.Timeout = TimeSpan.FromMinutes(double.Parse(timeOutInMin));
-                request.AddHeader("Content-Type", "application/json");
-                var body = JsonConvert.SerializeObject(geminiInputRoot);
-                request.AddStringBody(body, DataFormat.Json);
-                RestResponse response = await client.ExecuteAsync(request, CancellationToken.None);
-
-                if (response.IsSuccessful)
+            var response = await Policy
+                .HandleResult<RestResponse>(message => !message.IsSuccessStatusCode)
+                .WaitAndRetryAsync(new[]
                 {
-                    return JsonConvert.DeserializeObject<GeminiResponseRoot>(response.Content);
-                }
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(3),
+                    TimeSpan.FromSeconds(9)
+                }, (result, timeSpan, retryCount, context) => {
+                    Console.WriteLine($"Request failed with {result.Result.StatusCode}. " +
+                        $"Retry count = {retryCount}. Waiting {timeSpan} before next retry. ");
+                })
+                .ExecuteAsync(async () =>
+                {
+                    var options = new RestClientOptions(baseUrl);
+                    var client = new RestClient(options);
+                    var request = new RestRequest($"/v1beta/models/{modelName}:generateContent?key={apiKey}",
+                        Method.Post);
 
-                return null;
-            }
-            catch (Exception ex)
+                    request.Timeout = TimeSpan.FromSeconds(double.Parse(timeOutInMin.ToString()));
+                    request.AddHeader("Content-Type", "application/json");
+                    var body = JsonConvert.SerializeObject(geminiInputRoot);
+                    request.AddStringBody(body, DataFormat.Json);
+                    RestResponse response = await client.ExecuteAsync(request, CancellationToken.None);
+                    return response;
+                });
+
+            if (response.IsSuccessful)
             {
-                throw;
+                return JsonConvert.DeserializeObject<GeminiResponseRoot>(response.Content);
             }
+
+            return null;
         }
     }
 }

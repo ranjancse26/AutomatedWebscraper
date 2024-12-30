@@ -23,16 +23,6 @@ namespace AutomatedWebscraper.Headless
             this.popupTimeout = popupTimeout;
         }
 
-        public DateTime AddDays(DateTime date, int days)
-        {
-            return date.AddDays(days);
-        }
-
-        public string ToBookingTimestamp(DateTime date)
-        {
-            return date.ToString("yyyy-MM-dd");
-        }
-
         async Task ClosePopup(IPage page)
         {
             try
